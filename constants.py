@@ -10,4 +10,4 @@ phaseOffset_front = 0
 
 iterations = 1000
 maxForce = 500
-timeStep = 1/30
+timeStep = 1/5
