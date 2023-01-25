@@ -13,3 +13,4 @@ maxForce =350
 timeStep = 1/300
 
 numberOfGenerations = 10
+populationSize = 10
