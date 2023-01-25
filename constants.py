@@ -8,6 +8,6 @@ amplitude_front = pi/4
 frequency_front = 11
 phaseOffset_front = 0
 
-iterations = 10000
+iterations = 1000
 maxForce =350
-timeStep = 1/250
+timeStep = 1/500
