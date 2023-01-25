@@ -18,6 +18,7 @@ class SIMULATION:
         p.setGravity(0, 0, -9.8)    
         self.world = WORLD()
         self.robot = ROBOT()
+        self.directOrGui = directOrGui
 
     def Run(self):
         for i in range(0, c.iterations): 
@@ -26,7 +27,8 @@ class SIMULATION:
             self.robot.Think()
             self.robot.Act()
 
-            time.sleep(c.timeStep)
+            if self.directOrGui == "GUI":
+                time.sleep(c.timeStep)
 
     def Get_Fitness(self):
         self.robot.Get_Fitness()
