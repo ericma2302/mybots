@@ -28,6 +28,7 @@ class SIMULATION:
             self.robot.Act()
 
             if self.directOrGui == "GUI":
+                #print('test')
                 time.sleep(c.timeStep)
 
     def Get_Fitness(self):

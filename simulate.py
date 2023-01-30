@@ -1,7 +1,7 @@
 from simulation import SIMULATION
 import sys
 
-directOrGui = sys.argv[1]
+directOrGui = str(sys.argv[1])
 solutionID = sys.argv[2]
 simulation = SIMULATION(directOrGui, solutionID)
 simulation.Run()

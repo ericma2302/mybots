@@ -5,6 +5,7 @@ import pybullet as p
 from sensor import SENSOR
 from motor import MOTOR
 import os
+import constants as c
 
 class ROBOT:
     def __init__(self, solutionID):
@@ -36,7 +37,7 @@ class ROBOT:
 
         for neuronName in self.nn.Get_Neuron_Names():
             if self.nn.Is_Motor_Neuron(neuronName):
-                desiredAngle = self.nn.Get_Value_Of(neuronName)
+                desiredAngle = self.nn.Get_Value_Of(neuronName) * c.motorJoingRange
                 jointName = self.nn.Get_Motor_Sensor_Joint(neuronName)
                 self.motors[jointName].Set_Value(self.robotId, desiredAngle)
 
