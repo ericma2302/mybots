@@ -9,7 +9,7 @@ frequency_front = 11
 phaseOffset_front = 0
 
 iterations = 1000
-maxForce =350
+maxForce = 400
 timeStep = 1/300
 
 numberOfGenerations = 10
