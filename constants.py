@@ -9,7 +9,7 @@ frequency_front = 11
 phaseOffset_front = 0
 
 iterations = 1000
-maxForce = 400
+maxForce = 300 #600
 timeStep = 1/300
 
 numberOfGenerations = 10
@@ -18,4 +18,4 @@ populationSize = 10
 numSensorNeurons = 9
 numMotorNeurons = 8
 
-motorJoingRange = .2
+motorJointRange = .6 #.6

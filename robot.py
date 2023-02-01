@@ -22,7 +22,8 @@ class ROBOT:
     def Prepare_To_Sense(self):
         self.sensors = {}
         for linkName in pyrosim.linkNamesToIndices:
-            self.sensors[linkName] = SENSOR(linkName)
+            if(linkName != 'Head'):
+                self.sensors[linkName] = SENSOR(linkName)
 
     def Sense(self, time):
         for sensor in self.sensors:
@@ -37,7 +38,7 @@ class ROBOT:
 
         for neuronName in self.nn.Get_Neuron_Names():
             if self.nn.Is_Motor_Neuron(neuronName):
-                desiredAngle = self.nn.Get_Value_Of(neuronName) * c.motorJoingRange
+                desiredAngle = self.nn.Get_Value_Of(neuronName) * c.motorJointRange
                 jointName = self.nn.Get_Motor_Sensor_Joint(neuronName)
                 self.motors[jointName].Set_Value(self.robotId, desiredAngle)
 
@@ -51,7 +52,12 @@ class ROBOT:
     def Get_Fitness(self):
         basePositionAndOrientation = p.getBasePositionAndOrientation(self.robotId)
         basePosition = basePositionAndOrientation[0]
-        xPosition = basePosition[0]
+        xPosition = basePosition[0]*2 #- abs(basePosition[1])
+
+
+        stateOfLinkZero = p.getLinkState(self.robotId,0)
+        #if(basePosition[1] < stateOfLinkZero[0][1]):
+        #    xPosition = -10
         f = open("tmp" + str(self.solutionID) + ".txt", "w")
         f.write(str(xPosition))
         f.close()
