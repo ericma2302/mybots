@@ -52,12 +52,25 @@ class ROBOT:
     def Get_Fitness(self):
         basePositionAndOrientation = p.getBasePositionAndOrientation(self.robotId)
         basePosition = basePositionAndOrientation[0]
-        xPosition = basePosition[0]*2 #- abs(basePosition[1])
+        xPosition = basePosition[0] * .7 + basePosition[2] * .3#- abs(basePosition[1])
 
 
         stateOfLinkZero = p.getLinkState(self.robotId,0)
-        #if(basePosition[1] < stateOfLinkZero[0][1]):
-        #    xPosition = -10
+        if(basePosition[2] < stateOfLinkZero[0][2]):
+            xPosition = -10
+        stateOfLinkOne = p.getLinkState(self.robotId,1)
+        if(basePosition[2] < stateOfLinkOne[0][2]):
+            xPosition = -10
+        stateOfLinkTwo = p.getLinkState(self.robotId,2)
+        if(basePosition[2] < stateOfLinkTwo[0][2]):
+            xPosition = -10
+        stateOfLinkThree = p.getLinkState(self.robotId,3)
+        if(basePosition[2] < stateOfLinkThree[0][2]):
+            xPosition = -10
+        stateOfLinkFour = p.getLinkState(self.robotId,4)
+        if(basePosition[2] < stateOfLinkFour[0][2]):
+            xPosition = -10
+            
         f = open("tmp" + str(self.solutionID) + ".txt", "w")
         f.write(str(xPosition))
         f.close()

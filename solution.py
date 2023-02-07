@@ -39,7 +39,10 @@ class SOLUTION:
     def Create_World(self):
 
         for i in range(10):
-            pyrosim.Send_Cube(name="Box" + str(i), pos=[1.75 + .5 * i ,0,.15* (i+1)] , size=[.5,30,.15* (i+1)], mass = 1000000, inertia=.83)
+            pyrosim.Send_Cube(name="Box0" + str(i), pos=[1.75 + .5 * i ,0,.10/2* (i+1)] , size=[.5,30,.10* (i+1)], mass = 1000000, inertia=.83)
+           # pyrosim.Send_Cube(name="Box1" + str(i), pos=[-1.75 - .5 * i ,0,.15* (i+1)] , size=[.5,30,.15* (i+1)], mass = 1000000, inertia=.83)
+           # pyrosim.Send_Cube(name="Box2" + str(i), pos=[0  ,1.75 + .5 * i,.15* (i+1)] , size=[.5,30,.15* (i+1)], mass = 1000000, inertia=.83)
+
 
         pyrosim.End()
 
@@ -49,14 +52,13 @@ class SOLUTION:
         zpos = 1
 
         torsox = 1
-        torsoy = 1.5
-        torsoz = .5
-
-        legx = .75
+        torsoy = .7
+        torsoz = .40
+        legx = .3
         legy=.2
-        legz = .2
+        legz = .35
 
-        lowerlegx = .2
+        lowerlegx = .25
         lowerlegy = .1
         lowerlegz = zpos + torsoz/2 - torsoz - legz
         pyrosim.Send_Cube(name="Torso", pos=[0, 0, zpos] , size=[torsox,torsoy,torsoz])

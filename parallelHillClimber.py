@@ -54,6 +54,10 @@ class PARALLEL_HILL_CLIMBER:
             print('parent fitness: ', self.parents[parent].fitness,
                 ' child fitness: ', self.children[parent].fitness)
         print('\n')
+    
+    def Show_First(self):
+        self.parents[0].Start_Simulation("GUI")
+        self.parents[0].Wait_For_Simulation_To_End()
 
     def Show_Best(self):
         lowest_fitness_parent = 0
