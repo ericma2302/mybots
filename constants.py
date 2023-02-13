@@ -8,9 +8,9 @@ amplitude_front = pi/4
 frequency_front = 11
 phaseOffset_front = 0
 
-iterations = 1500
-maxForce = 750 #600
-timeStep = 1/300
+iterations = 200
+maxForce = 250 #600
+timeStep = 1/4000
 
 numberOfGenerations = 10
 populationSize = 10
@@ -18,4 +18,4 @@ populationSize = 10
 numSensorNeurons = 9
 numMotorNeurons = 8
 
-motorJointRange = .6 #.6
+motorJointRange = .45

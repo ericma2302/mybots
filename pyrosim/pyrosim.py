@@ -106,7 +106,8 @@ def Prepare_To_Simulate(bodyID):
 
     Prepare_Joint_Dictionary(bodyID)
 
-def Send_Cube(name="default",pos=[0,0,0],size=[1,1,1], inertia = 0.083, mass = 1):
+def Send_Cube(name="default",pos=[0,0,0],size=[1,1,1], inertia = 0.083, mass = 1, 
+    colorName = 'Cyan', rgb = (0, 1.0, 1.0)):
 
     global availableLinkIndex
 
@@ -120,7 +121,7 @@ def Send_Cube(name="default",pos=[0,0,0],size=[1,1,1], inertia = 0.083, mass = 1
 
         links.append(link)
     else:
-        link = LINK_URDF(name,pos,size)
+        link = LINK_URDF(name,pos,size, colorName, rgb)
 
         links.append(link)
 

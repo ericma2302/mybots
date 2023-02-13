@@ -1,7 +1,7 @@
 import os
-from parallelHillClimber import PARALLEL_HILL_CLIMBER
+from snake import SNAKE
+phc = SNAKE()
+for i in range(5):
+    phc.Show_First()
 
-phc = PARALLEL_HILL_CLIMBER()
-phc.Show_First()
-phc.Evolve()
-phc.Show_Best()
+

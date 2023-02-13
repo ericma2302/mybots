@@ -15,7 +15,7 @@ class ROBOT:
         pyrosim.Prepare_To_Simulate(self.robotId)
         self.Prepare_To_Sense()
         self.Prepare_To_Act()
-        os.system("rm brain" + str(solutionID) + ".nndf")
+        #os.system("rm brain" + str(solutionID) + ".nndf")
         self.solutionID = solutionID
         
 
@@ -38,6 +38,7 @@ class ROBOT:
 
         for neuronName in self.nn.Get_Neuron_Names():
             if self.nn.Is_Motor_Neuron(neuronName):
+                print(self.nn.Get_Value_Of(neuronName))
                 desiredAngle = self.nn.Get_Value_Of(neuronName) * c.motorJointRange
                 jointName = self.nn.Get_Motor_Sensor_Joint(neuronName)
                 self.motors[jointName].Set_Value(self.robotId, desiredAngle)
