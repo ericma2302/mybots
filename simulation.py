@@ -18,6 +18,7 @@ class SIMULATION:
         p.setGravity(0, 0, -9.8)    
         self.world = WORLD()
         self.robot = ROBOT(solutionID)
+        print('hello')
         self.directOrGui = directOrGui
 
     def Run(self):

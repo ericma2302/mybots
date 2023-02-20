@@ -21,9 +21,10 @@ class ROBOT:
 
     def Prepare_To_Sense(self):
         self.sensors = {}
+        print('helllo')
         for linkName in pyrosim.linkNamesToIndices:
-            if(linkName != 'Head'):
-                self.sensors[linkName] = SENSOR(linkName)
+            print(pyrosim.linkNamesToIndices)
+            self.sensors[linkName] = SENSOR(linkName)
 
     def Sense(self, time):
         for sensor in self.sensors:
