@@ -22,7 +22,8 @@ no other blocks branching from it) wil be removed from the existing body.
 
 **Citation**
 
-In this assignment, my codebase is built off of the ludobots wikepedia https://www.reddit.com/r/ludobots/wiki/installation/ and pybullet.
+In this assignment, my codebase is built off of the ludobots wikepedia https://www.reddit.com/r/ludobots/wiki/installation/ and pybullet. Concept/diagrams are
+inspired by Karl Sim's work.
 
 **Diagram**
 
