@@ -12,6 +12,7 @@ To run the program, run the search.py file.
 The fitness function is simply distance traveled in the +x direction. Mutations are made as follows: there are three possible mutations that
  can happen in one generation, each mutually exclusive and occurring with ⅓ probability. First, the weight of a random sensor/motor synapse will be re-randomized
 . Second, a randomly sized block will be added to a random face of a random pre-existing link. Third, a random block that has no “children” (i.e. 
+
 no other blocks branching from it) wil be removed from the existing body.
 
 **Fitness Curves located in fitnessCurves.pdf**
@@ -22,7 +23,7 @@ In this assignment, my codebase is built off of the ludobots wikepedia https://w
 **Diagram**
 Below are diagrams of how the 3d-objects are originally generated and how they mutate
 
-![generation](genearation.png)
+![generation](generation.png)
 
 ![mutation](mutation.png)
 
