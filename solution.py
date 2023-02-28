@@ -7,8 +7,8 @@ import constants as c
 
 
 
-def getColorAndRbg(sensors, index):
-    if sensors[index] == 1:
+def getColorAndRbg(val):
+    if val == 1:
             colorName = 'Green'
             rbg = (0, 1.0, 0)
     else:
@@ -16,27 +16,57 @@ def getColorAndRbg(sensors, index):
             rbg = (0, 1.0, 1.0)
     return (colorName, rbg)
 
+
+# def getColorAndRbg(sensors, index):
+#     if sensors[index] == 1:
+#             colorName = 'Green'
+#             rbg = (0, 1.0, 0)
+#     else:
+#             colorName = 'Cyan'
+#             rbg = (0, 1.0, 1.0)
+#     return (colorName, rbg)
+
 class SOLUTION:
     def __init__(self, nextAvailableID):
-        self.weights = numpy.random.rand(9, 8) * 2 - 1
-        self.myID = nextAvailableID
+
+        self.links = {}
+        self.instructions = []
         self.sensors = []
+        self.joints = []
+        self.directions = {}
+        self.weights = []
+        self.nextAvailableName = 0
+        self.myID = nextAvailableID
+        self.maxDepth = 3
+
+    def clearAll(self):
+        self.links.clear()
+        self.instructions.clear()
+        self.sensors.clear()
+        self.joints.clear()
+        self.directions.clear()
+        self.weights.clear()
+        self.nextAvailableName = 0
 
     def Start_Simulation(self, directOrGui):
         pyrosim.Start_SDF("world.sdf")
         self.Create_World()
-        choice = random.randint(0, 1)
-        if choice == 0:
+        if len(self.instructions) == 0:
             self.Generate_3d_body()
-        else:
-            self.Generate_2d_body()
+            while len(self.instructions) < 3:
+                self.clearAll()
+                self.Generate_3d_body()
+        self.doInstructions()
         self.Generate_3d_Brain()
+        #print('last checkpoint')
         os.system("python3 simulate.py " + directOrGui + " " + str(self.myID) + " 2&>1")
 
 
     def Wait_For_Simulation_To_End(self):
         fitnessString = "fitness" + str(self.myID) + ".txt"
+        
         while not os.path.exists(fitnessString):
+           # print('waiting on fitness ', self.myID)
             time.sleep(0.001)
 
         f = open(fitnessString, "r")
@@ -57,196 +87,287 @@ class SOLUTION:
         pyrosim.End()
 
 
-    def Generate_3d_body(self):
-        pyrosim.Start_URDF("body.urdf")
-        #make random horse
-        numLinks = 1
-        numLegLinks = random.randint(1, 4)
-        numLinks = numLinks + 4 * numLegLinks
-        print(numLegLinks, numLinks)
+    def checkContact(self, linkCoords, linkSize):
+        minx = linkCoords[0] - linkSize[0]/2
+        maxx = linkCoords[0] + linkSize[0]/2
 
-        #randomize sensors
-        sensors = []
-        for i in range(numLinks):
-            sensors.append(random.randint(0, 1))
+        miny = linkCoords[1] - linkSize[1]/2
+        maxy = linkCoords[1] + linkSize[1]/2
 
-        legHeights = []
-        sum = 0
-        for i in range(numLegLinks):
-            height = random.random() * .5 + .1
-            legHeights.append(height)
-            sum += height
-    
+        minz = linkCoords[2] - linkSize[2]/2
+        maxz = linkCoords[2] + linkSize[2]/2
 
-        torsoWidth = random.random() * .5 + .7
-        torsoLength = random.random() * .5 + .7
-        torsoHeight = random.random() * .5 + .1
-        startHeight = sum + torsoHeight/2
+        xoverlap = False
+        yoverlap = False
+        zoverlap = False
 
-        pyrosim.Send_Cube(name = '0', pos = [0, 0, startHeight], size=[torsoWidth, torsoLength, torsoHeight], colorName= getColorAndRbg(sensors, 0)[0], rgb= getColorAndRbg(sensors, 0)[1])
+        for link in self.links.keys():
+            if (self.links[link][0][1] > minx) and (self.links[link][0][0] < maxx):
+                xoverlap = True
+            if (self.links[link][1][1] > miny) and (self.links[link][1][0] < maxy):
+                yoverlap = True
+            if (self.links[link][2][1] > minz) and (self.links[link][2][0] < maxz):
+                zoverlap = True
+            if minz < 0 or maxz <=0:
+                return True
+
+            if(xoverlap and yoverlap and zoverlap):
+                #print('found contact')
+
+                return True
+            else:
+                xoverlap = False
+                yoverlap = False
+                zoverlap = False
+
+        return False
+
+            
+
+   # def randomizeInstructions(self, depth, direction, prevLinkAbsCoords, prevLinkSize, abs, prevJoint, parentName):
 
 
+
+    def makeNextLink(self, depth, direction, prevLinkAbsCoords, prevLinkSize, abs, prevJoint, parentName):
+        
         linkWidth = random.random() * .5 + .1
         linkLength = random.random() * .5 + .1
-        linkHeight = legHeights[0]
+        linkHeight = random.random() * .5 + .1
+        sensor = random.randint(0, 1)
+        colorAndRbg = getColorAndRbg(sensor)
 
+        if depth == self.maxDepth: #calculate this
+            return 0
 
-        pyrosim.Send_Joint(name = '0_10', parent='0', child='10', type="revolute", position=[torsoWidth/2, torsoLength/2, startHeight - torsoHeight/2], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name = '10', pos=[0, 0, -linkHeight/2], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, 1)[0], rgb=getColorAndRbg(sensors, 1)[1])
+        jointpos = None
+        if direction == -1:
+            # pyrosim.Send_Cube(name = '0', pos = [0, 0, linkHeight / 2], size=[linkWidth, linkLength, linkHeight], 
+            #     colorName= colorAndRbg[0], rgb= colorAndRbg[1])
 
-        pyrosim.Send_Joint(name = '0_11', parent='0', child='11', type="revolute", position=[-torsoWidth/2, torsoLength/2, startHeight - torsoHeight/2], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name = '11', pos=[0, 0, -linkHeight/2], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, 2)[0], rgb=getColorAndRbg(sensors, 2)[1])
+            #name, pos, size, colors, parentName, jointpos, jointaxis
+            self.instructions.append(('0', [0, 0, linkHeight/2], [linkWidth, linkLength, linkHeight], (colorAndRbg[0], colorAndRbg[1]),
+                    None, None, None))
 
-        pyrosim.Send_Joint(name = '0_12', parent='0', child='12', type="revolute", position=[torsoWidth/2, -torsoLength/2, startHeight - torsoHeight/2], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name = '12', pos=[0, 0, -linkHeight/2], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, 3)[0], rgb=getColorAndRbg(sensors, 3)[1])
+            linkAbsPos = [0, 0, linkHeight/2]
 
-        pyrosim.Send_Joint(name = '0_13', parent='0', child='13', type="revolute", position=[-torsoWidth/2, -torsoLength/2, startHeight - torsoHeight/2], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name = '13', pos=[0, 0, -linkHeight/2], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, 4)[0], rgb=getColorAndRbg(sensors, 4)[1])
+            self.links[self.nextAvailableName] = [[linkAbsPos[0] - linkWidth/2, linkAbsPos[0] + linkWidth/2], 
+                [linkAbsPos[1] - linkLength/2, linkAbsPos[1] + linkLength/2],
+                [linkAbsPos[2] - linkHeight/2, linkAbsPos[2] + linkHeight/2]]
 
+            self.nextAvailableName += 1
+            if sensor == 1:
+                self.sensors.append(0)
 
-        prevLinkHeight = linkHeight
-        for i in range(1, numLegLinks):
-            linkWidth = random.random() * .7 + .1
-            linkLength = random.random() * .5 + .1
-            linkHeight = legHeights[i]
+            for i in range(1, 7):
+                rand = random.randint(1,1)
+                if rand == 1:
+                    self.makeNextLink(depth + 1, i, linkAbsPos, [linkWidth, linkLength, linkHeight], 1, direction, "0")
+            return
 
-            pyrosim.Send_Joint(name = str(i) + '_' + str(i+1) + '0', parent=str(i)+'0', child=str(i+1) + '0', type="revolute", position=[0, 0, -prevLinkHeight], jointAxis="1 0 0")
-            pyrosim.Send_Cube(name = str(i+1) + '0', pos=[0, 0, -linkHeight/2], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, i * 4 + 1)[0], rgb=getColorAndRbg(sensors, i * 4 + 1)[1])
+        elif direction == 1:
+            if abs == 1:
+                jointpos = [prevLinkAbsCoords[0], prevLinkAbsCoords[1], prevLinkAbsCoords[2] + prevLinkSize[2] / 2]
+            else:
+                if prevJoint == 1:
+                    jointpos = [0, 0, prevLinkSize[2]]
+                elif prevJoint == 3:
+                    jointpos = [-prevLinkSize[0]/2, 0, prevLinkSize[2]/2]
+                elif prevJoint == 4:
+                    jointpos = [prevLinkSize[0]/2, 0, prevLinkSize[2]/2]
+                elif prevJoint == 5:
+                    jointpos = [0, -prevLinkSize[1]/2, prevLinkSize[2]/2]
+                elif prevJoint ==6 :
+                    jointpos = [0, prevLinkSize[1]/2, prevLinkSize[2]/2]
 
-            pyrosim.Send_Joint(name = str(i) + '_' + str(i+1) + '1', parent=str(i)+'1', child=str(i+1) + '1', type="revolute", position=[0, 0, -prevLinkHeight], jointAxis="1 0 0")
-            pyrosim.Send_Cube(name = str(i+1) + '1', pos=[0, 0, -linkHeight/2], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, i * 4 + 2)[0], rgb=getColorAndRbg(sensors, i * 4 + 2)[1])
+            linkPos = [0, 0, linkHeight/2]
+            linkAbsPos = [prevLinkAbsCoords[0], prevLinkAbsCoords[1], prevLinkAbsCoords[2] + prevLinkSize[2]/2 + linkHeight/2]
+            jointAxis = "0 1 1"
+        elif direction == 2:
+            if prevJoint == 2:
+                jointpos = [0, 0, -prevLinkSize[2]]
+            elif prevJoint == 3:
+                jointpos = [-prevLinkSize[0]/2, 0, -prevLinkSize[2]/2]
+            elif prevJoint == 4:
+                jointpos = [prevLinkSize[0]/2, 0, -prevLinkSize[2]/2]
+            elif prevJoint == 5:
+                jointpos = [0, -prevLinkSize[1]/2, -prevLinkSize[2]/2]
+            elif prevJoint == 6:
+                jointpos = [0, prevLinkSize[1]/2, -prevLinkSize[2]/2]
 
-            pyrosim.Send_Joint(name = str(i) + '_' + str(i+1) + '2', parent=str(i)+'2', child=str(i+1) + '2', type="revolute", position=[0, 0, -prevLinkHeight], jointAxis="1 0 0")
-            pyrosim.Send_Cube(name = str(i+1) + '2', pos=[0, 0, -linkHeight/2], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, i * 4 + 3)[0], rgb=getColorAndRbg(sensors, i * 4 + 3)[1])
+            linkPos = [0, 0, -linkHeight/2]
+            linkAbsPos = [prevLinkAbsCoords[0], prevLinkAbsCoords[1], prevLinkAbsCoords[2] - prevLinkSize[2]/2 - linkHeight/2]
+            jointAxis = "0 1 1"
+        elif direction == 3:
+            if abs == 1:
+                jointpos = [prevLinkAbsCoords[0] - prevLinkSize[0]/2, prevLinkAbsCoords[1], prevLinkAbsCoords[2]]
+            else:
+                if prevJoint == 1:
+                    jointpos = [-prevLinkSize[0]/2, 0, prevLinkSize[2]/2]
+                elif prevJoint == 3:
+                    jointpos = [-prevLinkSize[0], 0, 0]
+                elif prevJoint == 2:
+                    jointpos = [-prevLinkSize[0]/2, 0, -prevLinkSize[2]/2]
+                elif prevJoint == 5:
+                    jointpos = [-prevLinkSize[0]/2, -prevLinkSize[1]/2, 0]
+                elif prevJoint ==6 :
+                    jointpos = [-prevLinkSize[0]/2, prevLinkSize[1]/2, 0]
 
-            pyrosim.Send_Joint(name = str(i) + '_' + str(i+1) + '3', parent=str(i)+'3', child=str(i+1) + '3', type="revolute", position=[0, 0, -prevLinkHeight], jointAxis="1 0 0")
-            pyrosim.Send_Cube(name = str(i+1) + '3', pos=[0, 0, -linkHeight/2], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, i * 4 + 4)[0], rgb=getColorAndRbg(sensors, i * 4 + 4)[1])
+            linkPos = [-linkWidth/2, 0, 0]
+            linkAbsPos = [prevLinkAbsCoords[0] - prevLinkSize[0]/2 - linkWidth/2, prevLinkAbsCoords[1], prevLinkAbsCoords[2]]
+            jointAxis = "1 1 0" 
+        elif direction == 4:
+            if abs == 1:
+                jointpos = [prevLinkAbsCoords[0] + prevLinkSize[0]/2, prevLinkAbsCoords[1], prevLinkAbsCoords[2]]
+            else:
+                if prevJoint == 1:
+                    jointpos = [prevLinkSize[0]/2, 0, prevLinkSize[2]/2]
+                elif prevJoint == 4:
+                    jointpos = [prevLinkSize[0], 0, 0]
+                elif prevJoint == 2:
+                    jointpos = [prevLinkSize[0]/2, 0, -prevLinkSize[2]/2]
+                elif prevJoint == 5:
+                    jointpos = [prevLinkSize[0]/2, -prevLinkSize[1]/2, 0]
+                elif prevJoint ==6 :
+                    jointpos = [prevLinkSize[0]/2, prevLinkSize[1]/2, 0]
+
+            linkPos = [linkWidth/2, 0, 0]
+            linkAbsPos = [prevLinkAbsCoords[0] + prevLinkSize[0]/2 + linkWidth/2, prevLinkAbsCoords[1], prevLinkAbsCoords[2]]
+            jointAxis = "1 1 0"
+        elif direction == 5:
+            if abs == 1:
+                jointpos = [prevLinkAbsCoords[0], prevLinkAbsCoords[1] - prevLinkSize[1]/2, prevLinkAbsCoords[2]]
+            else:
+                if prevJoint == 1:
+                    jointpos = [0, -prevLinkSize[1]/2, prevLinkSize[2]/2]
+                elif prevJoint == 4:
+                    jointpos = [prevLinkSize[0]/2, -prevLinkSize[1]/2, 0]
+                elif prevJoint == 2:
+                    jointpos = [0, -prevLinkSize[1]/2, -prevLinkSize[2]/2]
+                elif prevJoint == 5:
+                    jointpos = [0, -prevLinkSize[1], 0]
+                elif prevJoint ==3 :
+                    jointpos = [-prevLinkSize[0]/2, -prevLinkSize[1]/2, 0]
+
+            linkPos = [0, -linkLength/2, 0]
+            linkAbsPos = [prevLinkAbsCoords[0], prevLinkAbsCoords[1] - prevLinkSize[1]/2 - linkLength/2, prevLinkAbsCoords[2]]
+            jointAxis = "1 1 0"
+        else:
+            if abs == 1:
+                jointpos = [prevLinkAbsCoords[0], prevLinkAbsCoords[1] + prevLinkSize[1]/2, prevLinkAbsCoords[2]]
+            else:
+                if prevJoint == 1:
+                    jointpos = [0, prevLinkSize[1]/2, prevLinkSize[2]/2]
+                elif prevJoint == 4:
+                    jointpos = [prevLinkSize[0]/2, prevLinkSize[1]/2, 0]
+                elif prevJoint == 2:
+                    jointpos = [0, prevLinkSize[1]/2, -prevLinkSize[2]/2]
+                elif prevJoint == 6:
+                    jointpos = [0, prevLinkSize[1], 0]
+                elif prevJoint ==3 :
+                    jointpos = [-prevLinkSize[0]/2, prevLinkSize[1]/2, 0]
+
+            linkPos = [0, linkLength/2, 0]
+            linkAbsPos = [prevLinkAbsCoords[0], prevLinkAbsCoords[1] + prevLinkSize[1]/2 + linkLength/2, prevLinkAbsCoords[2]]
+
+            jointAxis = "1 1 0"
         
-            prevLinkHeight = linkHeight
+
+        
+        if jointpos == None or self.checkContact(linkAbsPos, [linkWidth, linkLength, linkHeight]):
+            return -1
 
 
-        self.sensors = sensors
-        self.numArmLinks = numLegLinks
+        self.links[self.nextAvailableName] = [[linkAbsPos[0] - linkWidth/2, linkAbsPos[0] + linkWidth/2], 
+            [linkAbsPos[1] - linkLength/2, linkAbsPos[1] + linkLength/2],
+            [linkAbsPos[2] - linkHeight/2, linkAbsPos[2] + linkHeight/2]]
+
+        self.joints.append(parentName + "_" + str(self.nextAvailableName))
+
+
+        #name, pos, size, colors, parentName, jointpos, jointaxis
+        self.instructions.append((str(self.nextAvailableName), linkPos, [linkWidth, linkLength, linkHeight], (colorAndRbg[0], colorAndRbg[1]), 
+                parentName, jointpos, jointAxis))
+
+        # pyrosim.Send_Joint(name = parentName + "_" + str(self.nextAvailableName), parent = parentName, child=str(self.nextAvailableName), type = "revolute", position=jointpos, jointAxis=jointAxis)
+        # pyrosim.Send_Cube(name = str(self.nextAvailableName), pos = linkPos, size=[linkWidth, linkLength, linkHeight], colorName = colorAndRbg[0], rgb= colorAndRbg[1])
+        name = self.nextAvailableName
+        if sensor == 1:
+            self.sensors.append(name) 
+        self.directions[name] = [parentName, direction]
+        
+        self.nextAvailableName += 1
+
+        for i in range(1, 7):
+            rand = random.randint(1,2)
+            if rand == 1:
+                self.makeNextLink(depth + 1, i, linkAbsPos, [linkWidth, linkLength, linkHeight], 0, direction, str(name))
+        
+        return 1
+
+    def doInstructions(self):
+        pyrosim.Start_URDF("body" + str(self.myID) + ".urdf")
+        for instruction in self.instructions:
+            name = instruction[0]
+            pos = instruction[1]
+            size = instruction[2]
+            colors = instruction[3]
+            parentName = instruction[4]
+            jointpos = instruction[5]
+            jointaxis = instruction[6]
+
+            if parentName == None:
+                 pyrosim.Send_Cube(name = name, pos = [0, 0, size[2] / 2], size=[size[0], size[1], size[2]], 
+                    colorName= colors[0], rgb= colors[1])
+            else:
+                 pyrosim.Send_Joint(name = parentName + "_" + name, parent = parentName, child=name, type = "revolute", position=jointpos, jointAxis=jointaxis)
+                 pyrosim.Send_Cube(name = name, pos = pos, size=[size[0], size[1], size[2]], colorName = colors[0], rgb= colors[1])
+
         pyrosim.End()
 
+    def Generate_3d_body(self):
+
+        self.makeNextLink(0, -1, None, None, None, None, None)
+
+
+        #print(self.links)
+
+        #print(self.directions)
+        #print(self.sensors)
+        print(self.instructions)
+        #make random cube, randomize how many directions to branch into, randomize sensors
+        #if the space is alreaady taken, just return
+
+        #how to know if space is already taken? dictionary of min max x, y, z coordinates
 
     def Generate_3d_Brain(self):
             pyrosim.Start_NeuralNetwork("brain" + str(self.myID) + ".nndf")
-            if(self.sensors[0] == 1):
-                pyrosim.Send_Sensor_Neuron(name = 0, linkName='0')
             #make sensors for the assigned links
-            for i in range(1, len(self.sensors)):
-                if(self.sensors[i] == 1):
-                    pyrosim.Send_Sensor_Neuron(name = i , linkName = str(int((i-1)/4) + 1) + str((i-1) % 4))
+            for i in range(0, len(self.sensors)):
+                pyrosim.Send_Sensor_Neuron(name = i , linkName = str(self.sensors[i]))
             #attach a motor to every joint
 
-            jointNos = 100
-            for i in range(self.numArmLinks):
-                pyrosim.Send_Motor_Neuron(name = jointNos, jointName=str(i) + '_' + str(i+1) + '0')
-                pyrosim.Send_Motor_Neuron(name = jointNos + 1, jointName=str(i) + '_' + str(i+1) + '1')
-                pyrosim.Send_Motor_Neuron(name = jointNos + 2, jointName=str(i) + '_' + str(i+1) + '2')
-                pyrosim.Send_Motor_Neuron(name = jointNos + 3, jointName=str(i) + '_' + str(i+1) + '3')
-                jointNos = jointNos + 4
+            for i in range(len(self.joints)):
+                pyrosim.Send_Motor_Neuron(name = 100 + i, jointName=self.joints[i])
 
         
             #create a syanpse between every sensor neuron and every motor neuron
-            for i in range(1, len(self.sensors)):
-                if(self.sensors[i] == 1):
-                    jointNos = 100 + ((i - 1) % 4)
-                    for j in range(self.numArmLinks):
-                        pyrosim.Send_Synapse(sourceNeuronName=i, targetNeuronName=jointNos, weight=1)
-                        jointNos += 4
 
-            jointNos = 100
-            if(self.sensors[0] == 1):
-                for j in range(self.numArmLinks * 4):
-                    pyrosim.Send_Synapse(sourceNeuronName=0, targetNeuronName=jointNos, weight=1)
-                    jointNos + 1
+            if len(self.weights) == 0:
+                for i in range(len(self.sensors)):
+                    for j in range(len(self.joints)):
+                        self.weights.append(random.random() * 2 - .5)
+            
+
+            self.weights = numpy.reshape(self.weights, (len(self.sensors), len(self.joints)))
+
+
+            for i in range(0, len(self.sensors)):
+                for j in range(len(self.joints)):
+                    pyrosim.Send_Synapse(sourceNeuronName=i, targetNeuronName=100 + j, weight= self.weights[i][j])
 
             pyrosim.End()
 
 
-
-    def Generate_2d_body(self):
-        pyrosim.Start_URDF("body.urdf")
-
-        #make a random lizard
-        #first reserve 1 link for torso
-        numLinks = 1
-        #then randomize h w many links for arms
-        numArmLinks = random.randint(2, 5)
-        #four arms, so multiply by 4 and add to numLinks
-        numLinks = numLinks + 4 * numArmLinks
-        
-        print(numArmLinks, numLinks)
-
-        #randomize sensors
-        sensors = []
-        for i in range(numLinks):
-            sensors.append(random.randint(0, 1))
-
-        #build torso
-        torsoWidth = random.random() * .5 + .7
-        torsoLength = random.random() * 1.1 + .1
-        torsoHeight = random.random() * 1.1 + .1
-
-        pyrosim.Send_Cube(name = '0', pos = [0, 0, torsoHeight/2], size=[torsoWidth, torsoLength, torsoHeight], colorName= getColorAndRbg(sensors, 0)[0], rgb= getColorAndRbg(sensors, 0)[1])
-
-        #build first four arms
-        linkWidth = random.random() * .5 + .1
-        linkLength = random.random() * .5 + .1
-        linkHeight = random.random() * .5 + .1
-
-        jointHeight = min(torsoHeight,linkHeight) / 2
-        absolutePrevJointHeight = jointHeight
-        zpos = linkHeight/2 - absolutePrevJointHeight
-        prevLinkHeight = linkHeight
-        prevLinkLength = linkLength
-
-        pyrosim.Send_Joint(name = '0_10', parent='0', child='10', type="revolute", position=[torsoWidth/2, torsoLength/2, jointHeight], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name = '10', pos=[0, linkLength/2, zpos], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, 1)[0], rgb=getColorAndRbg(sensors, 1)[1])
-
-        pyrosim.Send_Joint(name = '0_11', parent='0', child='11', type="revolute", position=[-torsoWidth/2, torsoLength/2, jointHeight], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name = '11', pos=[0, linkLength/2, zpos], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, 2)[0], rgb=getColorAndRbg(sensors, 2)[1])
-
-        pyrosim.Send_Joint(name = '0_12', parent='0', child='12', type="revolute", position=[torsoWidth/2, -torsoLength/2, jointHeight], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name = '12', pos=[0, -linkLength/2, zpos], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, 3)[0], rgb=getColorAndRbg(sensors, 3)[1])
-
-        pyrosim.Send_Joint(name = '0_13', parent='0', child='13', type="revolute", position=[-torsoWidth/2, -torsoLength/2, jointHeight], jointAxis="1 0 0")
-        pyrosim.Send_Cube(name = '13', pos=[0, -linkLength/2, zpos], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, 4)[0], rgb=getColorAndRbg(sensors, 4)[1])
-
-        #now build out arms
-        for i in range(1, numArmLinks):
-            linkWidth = random.random() * .5 + .1
-            linkLength = random.random() * .5 + .1
-            linkHeight = random.random() * .5 + .1
-
-            jointHeight = min(prevLinkHeight,linkHeight)/2 - absolutePrevJointHeight
-            absolutePrevJointHeight = jointHeight +absolutePrevJointHeight
-            zpos = linkHeight/2 - absolutePrevJointHeight
-
-
-
-            pyrosim.Send_Joint(name = str(i) + '_' + str(i+1) + '0', parent=str(i)+'0', child=str(i+1) + '0', type="revolute", position=[0, prevLinkLength, jointHeight], jointAxis="1 0 0")
-            pyrosim.Send_Cube(name = str(i+1) + '0', pos=[0, linkLength/2, zpos], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, i * 4 + 1)[0], rgb=getColorAndRbg(sensors, i * 4 + 1)[1])
-
-            pyrosim.Send_Joint(name = str(i) + '_' + str(i+1) + '1', parent=str(i)+'1', child=str(i+1) + '1', type="revolute", position=[0, prevLinkLength, jointHeight], jointAxis="1 0 0")
-            pyrosim.Send_Cube(name = str(i+1) + '1', pos=[0, linkLength/2, zpos], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, i * 4 + 2)[0], rgb=getColorAndRbg(sensors, i * 4 + 2)[1])
-
-            pyrosim.Send_Joint(name = str(i) + '_' + str(i+1) + '2', parent=str(i)+'2', child=str(i+1) + '2', type="revolute", position=[0, -prevLinkLength, jointHeight], jointAxis="1 0 0")
-            pyrosim.Send_Cube(name = str(i+1) + '2', pos=[0, -linkLength/2, zpos], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, i * 4 + 3)[0], rgb=getColorAndRbg(sensors, i * 4 + 3)[1])
-
-            pyrosim.Send_Joint(name = str(i) + '_' + str(i+1) + '3', parent=str(i)+'3', child=str(i+1) + '3', type="revolute", position=[0, -prevLinkLength, jointHeight], jointAxis="1 0 0")
-            pyrosim.Send_Cube(name = str(i+1) + '3', pos=[0, -linkLength/2, zpos], size=[linkWidth, linkLength, linkHeight], colorName=getColorAndRbg(sensors, i * 4 + 4)[0], rgb=getColorAndRbg(sensors, i * 4 + 4)[1])
-        
-            prevLinkLength = linkLength
-            prevLinkHeight = linkHeight
-        self.sensors = sensors
-        self.numArmLinks = numArmLinks
-        pyrosim.End()
-
-
-   
 
     def Generate_1d_Body(self):
         pyrosim.Start_URDF("body.urdf")
@@ -309,11 +430,147 @@ class SOLUTION:
                     pyrosim.Send_Synapse(sourceNeuronName=i, targetNeuronName=j + 100, weight=1)
 
         pyrosim.End()
+
+    def addInstruction(self):
+        #add = random.randint(0, 1) only add for now
+        
+        #pick random link, pick random direction, add a new link
+        added = -1
+        # print('BEFORE INSERT')
+        # print(self.links.keys())
+        # print(self.directions)
+
+        while added == -1:
+            randLink = random.choice(list(self.links))
+            #print('key is ', randLink)
+            # randLink = self.links[randKey]
+            linkCoords = self.links[randLink]
+            randDirection = random.randint(0, 6)
+            prevLinkAbsCoords = [(linkCoords[0][0] + linkCoords[0][1])/2, (linkCoords[1][0] + linkCoords[1][1])/2, (linkCoords[2][0] + linkCoords[2][1])/2]
+            prevLinkSize = [abs(linkCoords[0][0] - linkCoords[0][1]), abs(linkCoords[1][0] - linkCoords[1][1]), abs(linkCoords[2][0] -
+                linkCoords[2][1])]
+            absol = 1 if randLink == 0 else 0
+            
+            prevJoint = self.directions[randLink][1] if randLink != 0 else 0
+            # parentName = self.directions[randLink][0]
+
+            added = self.makeNextLink(depth = self.maxDepth - 1, direction = randDirection, prevLinkAbsCoords=prevLinkAbsCoords, prevLinkSize=
+                prevLinkSize, abs = absol, prevJoint=prevJoint, parentName=str(randLink))
+        # print('AFTER INSERT')
+        # print(self.links.keys())
+        # print(self.directions)
+
+        #update weights (possible one more row, definitely one more column)
+        newWeights = []
+        for i in range(len(self.sensors)):
+            if(i < len(self.weights)):
+                for j in range(len(self.joints)):
+                    if j < len(self.joints) - 1:
+                        newWeights.append(self.weights[i][j])
+                    else:
+                        newWeights.append(random.random() * 2 - .5)
+            else:
+                for j in range(len(self.joints)):
+                    newWeights.append(random.random() * 2 - .5)
+        self.weights = numpy.reshape(newWeights, (len(self.sensors), len(self.joints)))
+
+
+    def removeInstruction(self):
+        allLeafs = []
+        for link in self.links.keys():
+            allLeafs.append(int(link))
+
+        # print("BEFORE REMOVE")
+        # print(self.links.keys())
+        # print(self.directions)
+        for direction in self.directions.keys():
+            
+            parent = int(self.directions[direction][0])
+            if parent in allLeafs:
+                allLeafs.remove(parent)
+        
+        
+        #randomize which leaf to remove
+        randomLeaf = random.randint(0, len(allLeafs) - 1)
+        randomLeaf = allLeafs[randomLeaf]
+        #print('removing link ', randomLeaf)
+
+        #name, pos, size, colors, parentName, jointpos, jointaxis
+        num1 = len(self.instructions)
+        self.instructions = [instruction for instruction in self.instructions if instruction[0] != str(randomLeaf)]
+        num2 = len(self.instructions)
+        #print('instructions removed: ', num1 - num2)
+
+        #update self.links
+        self.links.pop(randomLeaf)
+
+        #update self.sensors
+
+        rowIndex = None
+        if randomLeaf in self.sensors:
+            rowIndex  = self.sensors.index(randomLeaf)
+            self.sensors.remove(randomLeaf)
+ 
+
+        #update self.joints
+        for i in range(len(self.joints)):
+            joint = self.joints[i]
+            if joint.split("_")[1] == str(randomLeaf):
+                columnIndex = i #find column for weights
+
+                
+
+        self.joints = [joint for joint in self.joints if joint.split("_")[1] != str(randomLeaf)]
+
+
+        #update self.directions, pop off leaf being removed
+        self.directions.pop(randomLeaf)
+
+        #update weights (one less row possibly, definitely one less columns
+        self.weights = numpy.delete(self.weights, columnIndex, 1)
+        if rowIndex != None:
+            self.weights = numpy.delete(self.weights, rowIndex, 0)
+        
+        # print("AFTER REMOVE")
+        # print(self.links.keys())
+        # print(self.directions)
+        #print(self.instructions)
+
     def Mutate(self):
-        randomRow = random.randint(0, 2)
-     
-        randomColumn = random.randint(0, 1)
-        self.weights[randomRow, randomColumn] = random.random() * 2 - 1
+        #print('mutating')
+        if len(self.links) == 1: #this should never happen, but just in case, reset
+            self.clearAll()
+            self.Generate_3d_body() 
+            return
+
+
+        choice = random.randint(0, 1)
+        if choice == 0 or len(self.weights) == 0:
+            self.MutateShape()
+        else:
+            self.MutateSynapse()
+        
+
+
+
+    def MutateShape(self):
+        #print('mutating shape')
+        if(len(self.links) <= 3):
+            choice = 0
+        elif(len(self.links) >= 12):
+            choice = 1
+        else:
+            choice = random.randint(0, 1)
+
+        if choice == 0:
+            self.addInstruction()
+        else:
+            self.removeInstruction()
+    def MutateSynapse(self):
+        #print('mutating synapse')
+        randomRow = random.randint(0, len(self.weights) - 1)
+        randomColumn = random.randint(0, len(self.weights[0]) - 1)
+        self.weights[randomRow, randomColumn] = random.random() * 2 - .5
 
     def Set_ID(self, id):
         self.myID = id

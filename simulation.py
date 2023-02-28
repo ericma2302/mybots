@@ -18,8 +18,8 @@ class SIMULATION:
         p.setGravity(0, 0, -9.8)    
         self.world = WORLD()
         self.robot = ROBOT(solutionID)
-        print('hello')
         self.directOrGui = directOrGui
+        self.id = solutionID
 
     def Run(self):
         for i in range(0, c.iterations): 
@@ -33,6 +33,7 @@ class SIMULATION:
                 time.sleep(c.timeStep)
 
     def Get_Fitness(self):
+        print('made it to fitness on ', self.id)
         self.robot.Get_Fitness()
 
 
