@@ -27,9 +27,7 @@ In this assignment, my codebase is built off of the ludobots wikepedia https://w
 
 Below are diagrams of how the 3d-objects are originally generated and how they mutate
 
-![generation](generation.png)
-
-![mutation](mutation.png)
+![generation](generation.png) ![mutation](mutation.png)
 
 
 
