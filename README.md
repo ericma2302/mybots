@@ -17,7 +17,7 @@ The fitness function is simply distance traveled in the +x direction. Mutations 
 
 no other blocks branching from it) wil be removed from the existing body.
 
-==Fitness Curves located in fitnessCurves.pdf==
+## Fitness Curves located in fitnessCurves.pdf
 
 **Citation**
 
