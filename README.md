@@ -25,7 +25,7 @@ Below are diagrams of how the 3d-objects are originally generated and how they m
 
 ![generation](generation.png)
 
-![mutation](mutation.png)
+![mutation](utation.png)
 
 
 
