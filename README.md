@@ -1,5 +1,7 @@
 # 3d Object Evolution Assignment
 
+**Fitness Curves located in fitnessCurves.pdf**
+
 **Description**
 
 In this assignment, I evolved 5 seeds of random 3d-objects with a population size of 10 and a generation amount of 100.
@@ -16,8 +18,6 @@ The fitness function is simply distance traveled in the +x direction. Mutations 
 . Second, a randomly sized block will be added to a random face of a random pre-existing link. Third, a random block that has no “children” (i.e. 
 
 no other blocks branching from it) wil be removed from the existing body.
-
-## Fitness Curves located in fitnessCurves.pdf
 
 **Citation**
 
