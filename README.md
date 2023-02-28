@@ -8,8 +8,9 @@ In this assignment, I evolved 5 seeds of random 3d-objects with a population siz
 The original random 3d-objects are made in the following fashion: first, a randomly sized rectangular prism is placed at x=0, y=0. Then, there
  is ⅙ chance that a randomly sized block will grow from that “center” block in each direction. For each block that grows, the procedure recurs
 , where there is a ⅙ chance that new blocks grow from that block in some direction. This recursion occurs until we reach a recursion depth of 3.
-For each link, there is a ½ chance it has a sensor neuron, and every joint has a motor neuron, with all sensors connected to all motors via synapses. 
-To run the program, run the search.py file.
+If a link is chosen to grow in a place that is already occupied by another link, the new link is discarded and the old one is kept.
+For each link, there is a ½ chance it has a sensor neuron, and every joint has a motor neuron, with all sensors connected to all motors via synapses.
+Each synapse has a random wieght that can be mutated (read next section). To run the program, run the search.py file.
 
 **Evolution (Fitness and Mutation)**
 
