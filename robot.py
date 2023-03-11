@@ -15,9 +15,12 @@ class ROBOT:
         pyrosim.Prepare_To_Simulate(self.robotId)
         self.Prepare_To_Sense()
         self.Prepare_To_Act()
-        os.system("rm brain" + str(solutionID) + ".nndf")
-        os.system("rm body" + str(solutionID) + ".urdf")
+
         self.solutionID = solutionID
+
+    def deleteFiles(self):
+        os.system("rm brain" + str(self.solutionID) + ".nndf")
+        os.system("rm body" + str(self.solutionID) + ".urdf")
         
 
     def Prepare_To_Sense(self):

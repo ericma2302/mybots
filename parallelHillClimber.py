@@ -63,6 +63,8 @@ class PARALLEL_HILL_CLIMBER:
             if(self.parents[parent].fitness < self.children[parent].fitness):
                 self.parents[parent] = self.children[parent]
 
+    
+
     def recordBestFitness(self, currentGen):
         best_fitness_parent = 0
         for parent in self.parents:

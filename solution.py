@@ -75,6 +75,8 @@ class SOLUTION:
         f.close()
 
         os.system("rm " + fitnessString)
+        os.system("rm brain" + str(self.myID) + ".nndf")
+        os.system("rm body" + str(self.myID) + ".urdf")
 
     def Evaluate(self, directOrGui):
         pass
