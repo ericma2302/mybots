@@ -77,7 +77,9 @@ class SOLUTION:
         os.system("rm " + fitnessString)
         os.system("rm brain" + str(self.myID) + ".nndf")
         os.system("rm body" + str(self.myID) + ".urdf")
-
+        # else:
+        #     os.system("mv brain" + str(self.myID) + ".nndf firstFitnessRobots/brain_Seed" + str(seed) + ".nndf" )
+        #     os.system("mv body" + str(self.myID) + ".urdf firstFitnessRobots/body_Seed" + str(seed) + ".urdf" )
     def Evaluate(self, directOrGui):
         pass
         
@@ -124,9 +126,6 @@ class SOLUTION:
 
         return False
 
-            
-
-   # def randomizeInstructions(self, depth, direction, prevLinkAbsCoords, prevLinkSize, abs, prevJoint, parentName):
 
 
 

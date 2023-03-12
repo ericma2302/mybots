@@ -8,6 +8,7 @@ import numpy
 class PARALLEL_HILL_CLIMBER:
     def __init__(self, id):
         os.system("rm brain*.nndf")
+        os.system("rm body*.urdf")
         os.system("rm fitness*.txt")
 
         self.id = str(id)
@@ -72,6 +73,12 @@ class PARALLEL_HILL_CLIMBER:
                 best_fitness_parent = parent
         self.fitnessCurve[currentGen] = self.parents[best_fitness_parent].fitness
 
+        if currentGen == c.numberOfGenerations - 1:
+            self.parents[best_fitness_parent].Start_Simulation("DIRECT")
+            os.system("mv brain* bestFitnessRobots/brain_Seed" + str(self.id) + ".nndf")
+            os.system("rm fitness*")
+            os.system("mv body* bestFitnessRobots/body_Seed" + str(self.id) + ".urdf")
+
         
     def Print(self):
         print('\n')
@@ -82,7 +89,7 @@ class PARALLEL_HILL_CLIMBER:
     
     def Show_First(self):
         self.parents[0].Start_Simulation("GUI")
-        self.parents[0].Wait_For_Simulation_To_End()
+        self.parents[0].Wait_For_Simulation_To_End(True, self.id)
         print(len(self.parents[0].links))
 
     def Show_Best(self):
@@ -93,8 +100,16 @@ class PARALLEL_HILL_CLIMBER:
         self.parents[lowest_fitness_parent].Start_Simulation("GUI")
         print(len(self.parents[lowest_fitness_parent].links))
 
-    def Evaluate(self, solutions):
+        os.system("mv brain* bestFitnessRobots/brain_Seed" + str(self.id) + ".nndf")
+        os.system("rm fitness*")
+        os.system("mv body* bestFitnessRobots/body_Seed" + str(self.id) + ".urdf")
+
+
+    def Evaluate(self, solutions, save = False):
         for solution in solutions:
             solutions[solution].Start_Simulation("DIRECT")
         for solution in solutions:
-            solutions[solution].Wait_For_Simulation_To_End()
+            # if save:
+            #     solutions[solution].Wait_For_Simulation_To_End(True, self.id)
+            # else:
+                solutions[solution].Wait_For_Simulation_To_End()

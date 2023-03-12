@@ -12,8 +12,9 @@ iterations = 800
 maxForce = 400 #600
 timeStep = 1/400
 
-numberOfGenerations = 100
+numberOfGenerations = 500
 populationSize = 10
+numSeeds =10
 
 numSensorNeurons = 9
 numMotorNeurons = 8
