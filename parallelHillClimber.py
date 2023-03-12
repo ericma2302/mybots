@@ -23,19 +23,11 @@ class PARALLEL_HILL_CLIMBER:
         self.Evaluate(self.parents)
        
         
-        #self.parent.Evaluate("GUI")
         for currentGeneration in range(c.numberOfGenerations):
             self.Evolve_For_One_Generation(currentGeneration)
 
 
         numpy.save("data/hc" + self.id, self.fitnessCurve)
-
-        # matplotlib.pyplot.plot(self.fitnessCurve, label='Fitness Values', linewidth =3)
-        # matplotlib.pyplot.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        # matplotlib.pyplot.ylabel("Distance in x-axis")
-        # matplotlib.pyplot.xlabel("Generation #")
-        # matplotlib.pyplot.legend()
-        # matplotlib.pyplot.show()
 
     def Evolve_For_One_Generation(self, currentGen):
         self.Spawn()
@@ -89,7 +81,7 @@ class PARALLEL_HILL_CLIMBER:
     
     def Show_First(self):
         self.parents[0].Start_Simulation("GUI")
-        self.parents[0].Wait_For_Simulation_To_End(True, self.id)
+        self.parents[0].Wait_For_Simulation_To_End()
         print(len(self.parents[0].links))
 
     def Show_Best(self):

@@ -11,19 +11,19 @@ from simulation import SIMULATION
 # os.system("rm firstFitnessRobots/*")
 
 
-# for i in range(c.numSeeds):
-#     phc = PARALLEL_HILL_CLIMBER(i)
-#     phc.Evolve()
+for i in range(c.numSeeds):
+    phc = PARALLEL_HILL_CLIMBER(i)
+    phc.Show_First()
 
 
 #run best robots in GUI mode
-for i in range(c.numSeeds):
-    os.system("cp bestFitnessRobots/body_Seed" + str(i) + ".urdf body_Seed" + str(i) + ".urdf")
-    os.system("cp bestFitnessRobots/brain_Seed" + str(i) + ".nndf brain_Seed" + str(i) + ".nndf")
+# for i in range(c.numSeeds):
+#     os.system("cp bestFitnessRobots/body_Seed" + str(i) + ".urdf body_Seed" + str(i) + ".urdf")
+#     os.system("cp bestFitnessRobots/brain_Seed" + str(i) + ".nndf brain_Seed" + str(i) + ".nndf")
    
-    os.system("python3 simulate.py GUI _Seed" + str(i) + " 2&>1")
+#     os.system("python3 simulate.py GUI _Seed" + str(i) + " 2&>1")
    
 
-    os.system("rm body_Seed" + str(i) + ".urdf")
-    os.system("rm brain_Seed" + str(i) + ".nndf")
-    os.system("rm fitness_Seed" + str(i) + ".txt")
+#     os.system("rm body_Seed" + str(i) + ".urdf")
+#     os.system("rm brain_Seed" + str(i) + ".nndf")
+#     os.system("rm fitness_Seed" + str(i) + ".txt")
