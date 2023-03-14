@@ -2,11 +2,11 @@ from turtle import back
 import numpy
 import matplotlib.pyplot
 
-fitnessCurve = numpy.load('data/hc4.npy')
+fitnessCurve = numpy.load('data/hc9.npy')
 
 #print(back_data)
 #print(front_data)
-xticks = [i*10 for i in range(10)]
+xticks = [i*50 for i in range(10)]
 
 matplotlib.pyplot.plot(fitnessCurve, label='Fitness Values', linewidth =3)
 matplotlib.pyplot.xticks(xticks)

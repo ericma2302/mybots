@@ -101,7 +101,4 @@ class PARALLEL_HILL_CLIMBER:
         for solution in solutions:
             solutions[solution].Start_Simulation("DIRECT")
         for solution in solutions:
-            # if save:
-            #     solutions[solution].Wait_For_Simulation_To_End(True, self.id)
-            # else:
-                solutions[solution].Wait_For_Simulation_To_End()
+            solutions[solution].Wait_For_Simulation_To_End()

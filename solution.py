@@ -16,16 +16,6 @@ def getColorAndRbg(val):
             rbg = (0, 1.0, 1.0)
     return (colorName, rbg)
 
-
-# def getColorAndRbg(sensors, index):
-#     if sensors[index] == 1:
-#             colorName = 'Green'
-#             rbg = (0, 1.0, 0)
-#     else:
-#             colorName = 'Cyan'
-#             rbg = (0, 1.0, 1.0)
-#     return (colorName, rbg)
-
 class SOLUTION:
     def __init__(self, nextAvailableID):
 
@@ -58,7 +48,7 @@ class SOLUTION:
                 self.Generate_3d_body()
         self.doInstructions()
         self.Generate_3d_Brain()
-        #print('last checkpoint')
+
         os.system("python3 simulate.py " + directOrGui + " " + str(self.myID) + " 2&>1")
 
 
@@ -66,28 +56,19 @@ class SOLUTION:
         fitnessString = "fitness" + str(self.myID) + ".txt"
         
         while not os.path.exists(fitnessString):
-           # print('waiting on fitness ', self.myID)
             time.sleep(0.001)
 
         f = open(fitnessString, "r")
         self.fitness = float(f.read())
-       # print(self.fitness)
+
         f.close()
 
         os.system("rm " + fitnessString)
         os.system("rm brain" + str(self.myID) + ".nndf")
         os.system("rm body" + str(self.myID) + ".urdf")
-        # else:
-        #     os.system("mv brain" + str(self.myID) + ".nndf firstFitnessRobots/brain_Seed" + str(seed) + ".nndf" )
-        #     os.system("mv body" + str(self.myID) + ".urdf firstFitnessRobots/body_Seed" + str(seed) + ".urdf" )
-    def Evaluate(self, directOrGui):
-        pass
-        
-
 
 
     def Create_World(self):
-
         pyrosim.End()
 
 
@@ -116,8 +97,6 @@ class SOLUTION:
                 return True
 
             if(xoverlap and yoverlap and zoverlap):
-                #print('found contact')
-
                 return True
             else:
                 xoverlap = False
@@ -142,8 +121,7 @@ class SOLUTION:
 
         jointpos = None
         if direction == -1:
-            # pyrosim.Send_Cube(name = '0', pos = [0, 0, linkHeight / 2], size=[linkWidth, linkLength, linkHeight], 
-            #     colorName= colorAndRbg[0], rgb= colorAndRbg[1])
+
 
             #name, pos, size, colors, parentName, jointpos, jointaxis
             self.instructions.append(('0', [0, 0, linkHeight/2], [linkWidth, linkLength, linkHeight], (colorAndRbg[0], colorAndRbg[1]),
@@ -289,8 +267,6 @@ class SOLUTION:
         self.instructions.append((str(self.nextAvailableName), linkPos, [linkWidth, linkLength, linkHeight], (colorAndRbg[0], colorAndRbg[1]), 
                 parentName, jointpos, jointAxis))
 
-        # pyrosim.Send_Joint(name = parentName + "_" + str(self.nextAvailableName), parent = parentName, child=str(self.nextAvailableName), type = "revolute", position=jointpos, jointAxis=jointAxis)
-        # pyrosim.Send_Cube(name = str(self.nextAvailableName), pos = linkPos, size=[linkWidth, linkLength, linkHeight], colorName = colorAndRbg[0], rgb= colorAndRbg[1])
         name = self.nextAvailableName
         if sensor == 1:
             self.sensors.append(name) 
@@ -328,12 +304,6 @@ class SOLUTION:
     def Generate_3d_body(self):
 
         self.makeNextLink(0, -1, None, None, None, None, None)
-
-
-        #print(self.links)
-
-        #print(self.directions)
-        #print(self.sensors)
         print(self.instructions)
         #make random cube, randomize how many directions to branch into, randomize sensors
         #if the space is alreaady taken, just return
@@ -369,77 +339,12 @@ class SOLUTION:
             pyrosim.End()
 
 
-
-    def Generate_1d_Body(self):
-        pyrosim.Start_URDF("body.urdf")
-
-        #make random things
-        #first randomize how many links there will be 
-        numLinks = random.randint(5, 12)
-        #randomly assign sensors to some links
-        sensors = []
-        for i in range(numLinks):
-            sensors.append(random.randint(0, 1))
-            #0 represent no sensor, 1 represent sensor
-        #color links accordingly
-        #randomly shape links
-        for i in range(numLinks):
-            linkWidth = random.random() * 1.1 + .1
-            linkLength = random.random() * 1.1 + .1
-            linkHeight = random.random() * 1.1 + .1
-            if sensors[i] == 1:
-                colorName = 'Green'
-                rbg = (0, 1.0, 0)
-            else:
-                colorName = 'Cyan'
-                rbg = (0, 1.0, 1.0)
-
-            if(i != 0):
-                jointHeight = min(previousLinkHeight/2, linkHeight/2) if i == 1 else min(previousLinkHeight/2, linkHeight/2) - absolutePrevJointHeight
-                pyrosim.Send_Joint(name = str(i-1) + '_' + str(i) , parent= str(i-1) , child = str(i) , type = "revolute", position = [0, previousWidth, jointHeight], jointAxis="0 0 1")
-
-            previousLinkHeight = linkHeight
-            previousWidth = linkWidth
-            absolutePrevJointHeight = 0 if i == 0 else absolutePrevJointHeight + jointHeight
-
-            zpos = linkHeight/2 if i == 0 else -absolutePrevJointHeight + linkHeight/2
-            pyrosim.Send_Cube(name=str(i), pos=[0, linkWidth / 2, zpos] , size=[linkLength,linkWidth,linkHeight], colorName=colorName, rgb=rbg)
-           
-
-        #join with joints (not sure which axis to rotate on)
-        
-        self.sensors = sensors
-
-        pyrosim.End()
-
-    def Generate_1d_Brain(self):
-        pyrosim.Start_NeuralNetwork("brain" + str(self.myID) + ".nndf")
-
-        #make sensors for the assigned links
-        for i in range(len(self.sensors)):
-            if(self.sensors[i] == 1):
-                pyrosim.Send_Sensor_Neuron(name = i , linkName = str(i))
-                print('sending sensor for ', i)
-            if(i != len(self.sensors) - 1):
-                pyrosim.Send_Motor_Neuron(name = i + 100, jointName = str(i) + "_" + str(i+1))
-        #attach a motor to every joint
-    
-        #create a syanpse between every sensor neuron and every motor neuron
-        for i in range(len(self.sensors)):
-            if(self.sensors[i] == 1):
-                for j in range(len(self.sensors) - 1):
-                    pyrosim.Send_Synapse(sourceNeuronName=i, targetNeuronName=j + 100, weight=1)
-
-        pyrosim.End()
-
     def addInstruction(self):
         #add = random.randint(0, 1) only add for now
         
         #pick random link, pick random direction, add a new link
         added = -1
-        # print('BEFORE INSERT')
-        # print(self.links.keys())
-        # print(self.directions)
+ 
 
         while added == -1:
             randLink = random.choice(list(self.links))
@@ -457,9 +362,6 @@ class SOLUTION:
 
             added = self.makeNextLink(depth = self.maxDepth - 1, direction = randDirection, prevLinkAbsCoords=prevLinkAbsCoords, prevLinkSize=
                 prevLinkSize, abs = absol, prevJoint=prevJoint, parentName=str(randLink))
-        # print('AFTER INSERT')
-        # print(self.links.keys())
-        # print(self.directions)
 
         #update weights (possible one more row, definitely one more column)
         newWeights = []
@@ -481,9 +383,6 @@ class SOLUTION:
         for link in self.links.keys():
             allLeafs.append(int(link))
 
-        # print("BEFORE REMOVE")
-        # print(self.links.keys())
-        # print(self.directions)
         for direction in self.directions.keys():
             
             parent = int(self.directions[direction][0])
@@ -497,10 +396,8 @@ class SOLUTION:
         #print('removing link ', randomLeaf)
 
         #name, pos, size, colors, parentName, jointpos, jointaxis
-        num1 = len(self.instructions)
         self.instructions = [instruction for instruction in self.instructions if instruction[0] != str(randomLeaf)]
-        num2 = len(self.instructions)
-        #print('instructions removed: ', num1 - num2)
+ 
 
         #update self.links
         self.links.pop(randomLeaf)
@@ -532,10 +429,7 @@ class SOLUTION:
         if rowIndex != None:
             self.weights = numpy.delete(self.weights, rowIndex, 0)
         
-        # print("AFTER REMOVE")
-        # print(self.links.keys())
-        # print(self.directions)
-        #print(self.instructions)
+
 
     def Mutate(self):
         #print('mutating')
