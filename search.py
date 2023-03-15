@@ -4,16 +4,16 @@ import constants as c
 from simulation import SIMULATION
 
 
-#evolve phc
+#evolve phc, comment these lines until 19 to prevent new robots being generated
 
-# os.system("rm data/hc*")
-# os.system("rm bestFitnessRobots/*")
-# os.system("rm firstFitnessRobots/*")
+os.system("rm data/hc*")
+os.system("rm bestFitnessRobots/*")
+os.system("rm firstFitnessRobots/*")
 
 
-# for i in range(c.numSeeds):
-#     phc = PARALLEL_HILL_CLIMBER(i)
-#     phc.Evolve()
+for i in range(c.numSeeds):
+    phc = PARALLEL_HILL_CLIMBER(i)
+    phc.Evolve()
 
 
 #run best robots in GUI mode
