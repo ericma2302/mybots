@@ -27,8 +27,8 @@ Below are diagrams of how the 3d-objects are originally generated, how they muta
 
 ![](generation.png)
 ![](mutation.png)
-![](aexample_mutation.png)
-![](aselection.png)
+![](example_mutation.png)
+![](selection.png)
 
 
 
