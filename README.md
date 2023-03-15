@@ -3,12 +3,12 @@
 ### Description
 In this assignment, I evolved 10 seeds of random 3d-objects with a population size of 10 and a generation amount of 500 to move in the +x axis. To run the program, run the **search.py** file. Below contains the methods and results of the simulations.
 
-*2 minute movie* (https://youtu.be/Bv_Re1l9b0o):
+**2 minute movie** (https://youtu.be/Bv_Re1l9b0o):
 
 https://user-images.githubusercontent.com/77948606/225170038-f4be8f02-17fa-434e-ac39-dd23369b4512.mp4 
 
 
-*GIF of un-evolved vs evolved robots* (https://youtu.be/7gnlgIt3Z1E)
+**GIF of un-evolved vs evolved robots** (https://youtu.be/7gnlgIt3Z1E)
 
 ![](artificial_life_gif.gif)
 
@@ -27,6 +27,7 @@ Below are diagrams of how the 3d-objects are originally generated, how they muta
 
 ![](generation.png)
 ![](mutation.png)
+![](example_mutation.png)
 ![](selection.png)
 
 
