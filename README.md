@@ -26,6 +26,7 @@ The fitness function is simply distance traveled in the +x direction. Mutations 
 Below are diagrams of how the 3d-objects are originally generated, how they mutate, and how they are selected during evolution (all respectively).
 
 ![](generation.png)
+![](generation_example.png)
 ![](mutation.png)
 ![](example_mutation.png)
 ![](selection.png)
